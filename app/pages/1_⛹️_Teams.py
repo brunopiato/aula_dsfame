@@ -184,9 +184,23 @@ with tab3:
         
         with st.container():
             
-            col1, col2 = st.columns([4, 4])
+            col1, col2 = st.columns([2, 4])
             selected_team_df = df_jogadores[df_jogadores['Team']==team]
             
+            spec_04 = px.histogram(data_frame=df_jogadores[df_jogadores['Team'] == 'BOS'],
+                                   x='POS',
+                                   template='plotly_dark',
+                                   color='POS')
+            col1.plotly_chart(spec_04, use_container_width=True)
+            
+            spec_00 = px.pie(data_frame=selected_team_df,
+                             names='POS',
+                             values='PTS',
+                             hole=0.5,
+                             template='plotly_dark',
+                             title='Points per player position'
+                             ).update_layout(title_x=0.23)
+            col1.plotly_chart(spec_00, use_container_width=True)
             
             spec_01 = px.scatter(data_frame=selected_team_df, 
                                 y='3PM',
@@ -195,9 +209,9 @@ with tab3:
                                 hover_data='PName',
                                 template='plotly_dark',
                                 title='3PM versus 2PM with size prportional to the Games Played',
-                                height=400).update_layout(title_x=0.35)
+                                height=400).update_layout(title_x=0.25)
             
-            col1.plotly_chart(spec_01, use_container_width=True)
+            col2.plotly_chart(spec_01, use_container_width=True)
             
             spec_02 = px.scatter(data_frame=selected_team_df,
                                 x='BLK',
@@ -205,6 +219,6 @@ with tab3:
                                 size='DREB',
                                 hover_data='PName', 
                                 template='plotly_dark',
-                                title='Blocks versus steals with size proportional to the DREB value').update_layout(title_x=0.35)
+                                title='Blocks versus steals with size proportional to the DREB value').update_layout(title_x=0.25)
             col2.plotly_chart(spec_02, use_container_width=True)
             
