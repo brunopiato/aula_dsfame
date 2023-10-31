@@ -10,6 +10,7 @@ tab1, tab2, tab3 = st.tabs(["Offensive", "Defensive", "Specific"])
 
 df_times = pd.read_csv('/home/bruno/repos/aulas_Streamlit_teste/data/df_times.csv', index_col=0)
 
+df_jogadores = pd.read_csv('/home/bruno/repos/aulas_Streamlit_teste/data/df_jogadores.csv')
 
 with tab1:
     with st.container():
@@ -39,7 +40,7 @@ with tab1:
         col1, col2 = st.columns(2)
         
         with col1:
-            fig1 = px.bar(data_frame=df_times,
+            off_00 = px.bar(data_frame=df_times,
                     y=df_times.index,
                     x='PTS',
                     orientation='h',
@@ -49,26 +50,46 @@ with tab1:
                                                           xaxis_title='Points made by all players', yaxis_title='Team', showlegend=False,
                                                           title_x=0.35,
                                                           yaxis={'categoryorder':'total ascending'})
-            st.plotly_chart(fig1, use_container_width=True)
+            st.plotly_chart(off_00, use_container_width=True)
         
         with col2:
             
             st.write('')
             st.write('')
             
-            TPP_max=int(df_times['3P%'].max())
-            FGP_max=int(df_times['FG%'].max())
-            TPP_max=int(df_times['2P%'].max())
-            FT_max=int(df_times['FT%'].max())
+            max_3PP = df_times['3P%'].max()
+            max_FGP = df_times['FG%'].max()
+            max_2PP = df_times['2P%'].max()
+            max_FT = df_times['FT%'].max()
             
             st.dataframe(df_times[['3P%', 'FG%', '2P%', 'FT%']],
                         height=800,
                         column_config={
-                            "3P%": st.column_config.ProgressColumn(format='%f', min_value=0, max_value=TPP_max),
-                            "FG%": st.column_config.ProgressColumn(format='%f', min_value=0, max_value=FGP_max),
-                            "2P%": st.column_config.ProgressColumn(format='%f', min_value=0, max_value=TPP_max),
-                            "FT%": st.column_config.ProgressColumn(format='%f', min_value=0, max_value=FT_max)
+                            "3P%": st.column_config.ProgressColumn(format='%f', min_value=0, max_value=max_3PP),
+                            "FG%": st.column_config.ProgressColumn(format='%f', min_value=0, max_value=max_FGP),
+                            "2P%": st.column_config.ProgressColumn(format='%f', min_value=0, max_value=max_2PP),
+                            "FT%": st.column_config.ProgressColumn(format='%f', min_value=0, max_value=max_FT)
                         })
+        
+        off_01 = px.scatter(data_frame=df_times,
+                            x = '2PM',
+                            y = '3PM', 
+                            color = df_times.index,
+                            template='plotly_dark',
+                            opacity=0.6,
+                            title='3PM and 2PM by all players per team').update_traces(marker_size=40)
+        st.plotly_chart(off_01, use_container_width=True)
+        
+        off_02 = px.scatter(df_times,
+                            y='3P%', 
+                            x='2P%',
+                            template='plotly_dark',
+                            color=df_times.index,
+                            title='Mean 3P percentage vs 2P percentage for all players per team',
+                            opacity=0.6).update_traces(marker_size=40)
+        st.plotly_chart(off_02, use_container_width=True)
+        
+        
 with tab2:
     
     with st.container():
@@ -98,20 +119,20 @@ with tab2:
         
         with col1:
             
-            fig2 = px.bar(data_frame=df_times,
+            def_00 = px.bar(data_frame=df_times,
                           x='defensive',
                           y=df_times.index,
                           color=df_times.index,
                           orientation='h',
                           template='plotly_dark',
-                          height=800).update_layout(title='Total defensive acts per team',
+                          height=850).update_layout(title='Total defensive acts per team',
                                                     xaxis_title='Defensive acts made',
                                                     yaxis_title='Team',
                                                     showlegend=False,
                                                     title_x=0.35,
                                                     yaxis={'categoryorder':'total ascending'})
                           
-            st.plotly_chart(fig2, use_container_width=True)
+            st.plotly_chart(def_00, use_container_width=True)
             
         with col2:
             
@@ -123,13 +144,14 @@ with tab2:
             PF_max=int(df_times['PF'].max())
             
             st.dataframe(df_times[['DREB', 'STL', 'BLK', 'PF']],
-                            height=1080,
+                            height=800,
                         column_config={
                             "DREB": st.column_config.ProgressColumn(format='%f', min_value=0, max_value=DREB_max),
                             "STL": st.column_config.ProgressColumn(format='%f', min_value=0, max_value=STL_max),                        
                             "BLK": st.column_config.ProgressColumn(format='%f', min_value=0, max_value=BLK_max),
                             "PF": st.column_config.ProgressColumn(format='%f', min_value=0, max_value=PF_max)
                         })
+
 
 with tab3:
     teams = df_times.index.unique().sort_values()
@@ -138,12 +160,51 @@ with tab3:
                  options=teams)
     col1, col2 = st.columns([1,6])
 
-    # Trocar o link da logo e o nomes do time por um selecionador de time e filtro a partir dele
     link_logo = df_times[df_times.index == team]['Logo'][0]
     nome_time = df_times[df_times.index == team]['Names'][0]
 
-    with col1: 
-        st.markdown(f'![]({link_logo})')
+    
+    with st.container():
+        with col1: 
+            st.markdown(f'![]({link_logo})')
         
-    with col2:
-        st.markdown(f'## {nome_time}')
+        with col2:
+            with st.container():
+                st.markdown(f'## {nome_time}')
+                
+                team_row = df_times[df_times.index == team]
+                
+                col1, col2, col3, col4, col5, col6 = st.columns(6)
+                col1.metric(label='Points', value=team_row['PTS'])
+                col2.metric(label='Assists', value=team_row['AST'])
+                col3.metric(label='Rebounds', value=team_row['REB'])
+                col4.metric(label='Steals', value=team_row['STL'])
+                col5.metric(label='Blocks', value=team_row['BLK'])
+                col6.metric(label='Turnovers', value=team_row['TOV'])
+        
+        with st.container():
+            
+            col1, col2 = st.columns([4, 4])
+            selected_team_df = df_jogadores[df_jogadores['Team']==team]
+            
+            
+            spec_01 = px.scatter(data_frame=selected_team_df, 
+                                y='3PM',
+                                x='2PM',
+                                size='GP',
+                                hover_data='PName',
+                                template='plotly_dark',
+                                title='3PM versus 2PM with size prportional to the Games Played',
+                                height=400).update_layout(title_x=0.35)
+            
+            col1.plotly_chart(spec_01, use_container_width=True)
+            
+            spec_02 = px.scatter(data_frame=selected_team_df,
+                                x='BLK',
+                                y='STL',
+                                size='DREB',
+                                hover_data='PName', 
+                                template='plotly_dark',
+                                title='Blocks versus steals with size proportional to the DREB value').update_layout(title_x=0.35)
+            col2.plotly_chart(spec_02, use_container_width=True)
+            
