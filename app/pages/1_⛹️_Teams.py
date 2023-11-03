@@ -8,9 +8,9 @@ st.set_page_config(page_title='Teams',
 
 tab1, tab2, tab3 = st.tabs(["Offensive", "Defensive", "Specific"])
 
-df_times = pd.read_csv('/home/bruno/repos/aulas_Streamlit_teste/data/df_times.csv', index_col=0)
+df_times = pd.read_csv('/home/bruno/repos/aula_dsfame/data/df_times.csv', index_col=0)
 
-df_jogadores = pd.read_csv('/home/bruno/repos/aulas_Streamlit_teste/data/df_jogadores.csv')
+df_jogadores = pd.read_csv('/home/bruno/repos/aula_dsfame/data/df_jogadores.csv')
 
 with tab1:
     with st.container():
